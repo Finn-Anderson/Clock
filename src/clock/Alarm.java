@@ -1,17 +1,19 @@
 package clock;
 
+import java.util.Date;
+
 public class Alarm {
 
-    protected String time;
+    protected Date date;
     protected String summary;
 
-    public Alarm(String time, String summary) {
-        this.time = time;
+    public Alarm(Date date, String summary) {
+        this.date = date;
         this.summary = summary;
     }
 
-    public String getTime() {
-        return time;
+    public Date getDate() {
+        return date;
     }
 
     public String getSummary() {

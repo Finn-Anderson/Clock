@@ -1,19 +1,20 @@
 package clock;
 
+import priorityqueues.PriorityItem;
 import priorityqueues.PriorityQueue;
 import priorityqueues.QueueOverflowException;
 import priorityqueues.SortedLinkedListPriorityQueue;
 
+import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Scanner;
-import java.util.TimeZone;
+import java.util.*;
+import java.util.List;
 import javax.swing.*;
+import javax.swing.Timer;
 
 public class Controller {
     
@@ -22,6 +23,8 @@ public class Controller {
     
     Model model;
     View view;
+
+    private static PriorityQueue<Alarm> q = new SortedLinkedListPriorityQueue<>();
     
     public Controller(Model m, View v) {
         model = m;
@@ -35,6 +38,17 @@ public class Controller {
         
         timer = new Timer(100, listener);
         timer.start();
+    }
+
+    public static void populateAlarmList(Box box) {
+        List<PriorityItem<Alarm>> a = q.getAlarms();
+        for (var i = 0; i < a.size(); i++) {
+            JButton btn = new JButton("<html>" + a.get(i).getItem().getDate() + "<br>" + a.get(i).getItem().getSummary() + "</html>");
+            btn.setAlignmentX(Component.CENTER_ALIGNMENT);
+            box.add(btn);
+            box.add(Box.createVerticalStrut(10));
+        }
+
     }
 
     /**
@@ -59,7 +73,6 @@ public class Controller {
                 }
 
                 if (!time.isEmpty() && !summary.isEmpty()) {
-                    PriorityQueue<Alarm> q = new SortedLinkedListPriorityQueue<>();
                     try {
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
                         TimeZone timezone = TimeZone.getTimeZone("Europe/London");
@@ -67,7 +80,7 @@ public class Controller {
 
                         Date date = sdf.parse(time);
 
-                        Alarm alarm = new Alarm(time, summary);
+                        Alarm alarm = new Alarm(date, summary);
 
                         q.add(alarm, date.getTime());
                     } catch (QueueOverflowException e) {

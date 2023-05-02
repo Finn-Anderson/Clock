@@ -39,7 +39,10 @@ public class View implements Observer {
         chooserWindow.setSize(new Dimension(200, 200));
         chooserWindow.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
+        UIManager.put("FileChooser.saveButtonText","Open");
+
         JFileChooser chooser = new JFileChooser(new File("C:\\Users\\finn\\OneDrive\\Code\\Java Projects\\Clock\\data"));
+        chooser.setDialogTitle("Choose an iCalendar file to open");
         chooser.setSize(new Dimension(300, 400));
 
         int result = chooser.showSaveDialog(chooserWindow);
@@ -54,6 +57,32 @@ public class View implements Observer {
 
             chooserWindow.setVisible(false);
         }
+
+        // Alarms list to add/edit/delete alarms.
+        JButton alarms = new JButton("Alarms");
+        alarms.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JDialog alarmWindow = new JDialog();
+                alarmWindow.setSize(new Dimension(300, 400));
+                alarmWindow.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+
+                Box box = Box.createVerticalBox();
+                alarmWindow.add(box);
+
+                Controller.populateAlarmList(box);
+
+                JButton newAlarm = new JButton("New");
+                newAlarm.setAlignmentX(Component.CENTER_ALIGNMENT);
+                box.add(newAlarm, BorderLayout.PAGE_END);
+
+                alarmWindow.setVisible(true);
+            }
+        });
+
+        JPanel menu = new JPanel();
+        pane.add(menu, BorderLayout.PAGE_END);
+        menu.add(alarms);
         
         // End of borderlayout code
         
