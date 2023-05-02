@@ -73,8 +73,8 @@ public class ClockPanel extends JPanel {
             double height = msgbounds.getHeight();
             double width = msgbounds.getWidth();
             
-            gg.drawString(s, (new Float(x1 - width/2)).floatValue(), 
-                          (new Float(y1 + height/2 - descent)).floatValue());
+            gg.drawString(s, Float.valueOf((float) (x1 - width / 2)),
+                          (Float.valueOf((float) (y1 + height/2 - descent))));
         }
         
         // Draw the hour hand
