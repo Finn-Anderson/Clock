@@ -1,5 +1,6 @@
 package clock;
 
+import priorityqueues.PriorityItem;
 import priorityqueues.QueueUnderflowException;
 
 import javax.swing.*;
@@ -7,6 +8,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.Executors;
@@ -78,7 +80,14 @@ public class View implements Observer {
                 Box box = Box.createVerticalBox();
                 alarmWindow.add(box);
 
-                Controller.populateAlarmList(box);
+                List<PriorityItem<Alarm>> alarmList = Controller.fetchAlarmList();
+
+                for (var i = 0; i < alarmList.size(); i++) {
+                    JButton btn = new JButton("<html>" + alarmList.get(i).getItem().getDate() + "<br>" + alarmList.get(i).getItem().getSummary() + "</html>");
+                    btn.setAlignmentX(Component.CENTER_ALIGNMENT);
+                    box.add(btn);
+                    box.add(Box.createVerticalStrut(10));
+                }
 
                 JButton newAlarm = new JButton("New");
                 newAlarm.setAlignmentX(Component.CENTER_ALIGNMENT);

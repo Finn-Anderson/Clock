@@ -3,7 +3,6 @@ package clock;
 import priorityqueues.*;
 import priorityqueues.PriorityQueue;
 
-import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -38,15 +37,10 @@ public class Controller {
         timer.start();
     }
 
-    public static void populateAlarmList(Box box) {
-        List<PriorityItem<Alarm>> a = q.getAlarms();
-        for (var i = 0; i < a.size(); i++) {
-            JButton btn = new JButton("<html>" + a.get(i).getItem().getDate() + "<br>" + a.get(i).getItem().getSummary() + "</html>");
-            btn.setAlignmentX(Component.CENTER_ALIGNMENT);
-            box.add(btn);
-            box.add(Box.createVerticalStrut(10));
-        }
+    public static List<PriorityItem<Alarm>> fetchAlarmList() {
+        List<PriorityItem<Alarm>> alarmList = q.getAlarms();
 
+        return alarmList;
     }
 
     public static String nextAlarm() throws QueueUnderflowException {
@@ -98,9 +92,7 @@ public class Controller {
                         Date date = sdf.parse(time);
                         Date currentDate = new Date();
 
-                        if (date.getTime() < currentDate.getTime()) {
-                            removeAlarm(time, summary);
-                        } else {
+                        if (date.getTime() > currentDate.getTime()) {
                             Alarm alarm = new Alarm(date, summary);
 
                             q.add(alarm, date.getTime());
@@ -120,7 +112,8 @@ public class Controller {
         }
     }
 
-    public static void removeAlarm(String time, String summary) {
-        // Search how to remove all text between two lines (BEGIN/END: VEVENT).
+    public static void removeAlarm() throws QueueUnderflowException {
+
+        q.remove();
     }
 }
