@@ -1,5 +1,7 @@
 package clock;
 
+import priorityqueues.QueueUnderflowException;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -7,10 +9,15 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class View implements Observer {
     
     ClockPanel panel;
+
+    private JLabel txt;
     
     public View(Model model) {
         JFrame frame = new JFrame();
@@ -60,6 +67,7 @@ public class View implements Observer {
 
         // Alarms list to add/edit/delete alarms.
         JButton alarms = new JButton("Alarms");
+        alarms.setAlignmentX(Component.LEFT_ALIGNMENT);
         alarms.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -83,14 +91,34 @@ public class View implements Observer {
         JPanel menu = new JPanel();
         pane.add(menu, BorderLayout.PAGE_END);
         menu.add(alarms);
+
+        txt = new JLabel();
+        txt.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        menu.add(txt);
         
         // End of borderlayout code
         
         frame.pack();
         frame.setVisible(true);
+
+        try {
+            String countdown = Controller.nextAlarm();
+
+            txt.setText(countdown);
+        } catch (QueueUnderflowException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     public void update(Observable o, Object arg) {
         panel.repaint();
+
+        try {
+            String countdown = Controller.nextAlarm();
+
+            txt.setText(countdown);
+        } catch (QueueUnderflowException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

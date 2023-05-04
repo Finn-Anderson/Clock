@@ -1,9 +1,7 @@
 package clock;
 
-import priorityqueues.PriorityItem;
+import priorityqueues.*;
 import priorityqueues.PriorityQueue;
-import priorityqueues.QueueOverflowException;
-import priorityqueues.SortedLinkedListPriorityQueue;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -51,6 +49,25 @@ public class Controller {
 
     }
 
+    public static String nextAlarm() throws QueueUnderflowException {
+        String countdown = null;
+
+        if (!q.isEmpty()) {
+            Alarm head = q.head();
+
+            long time = ( (head.date.getTime() - new Date().getTime()) / 1000 );
+            long days = time / (24 * 60 * 60);
+            long secondsInADay = time % (24 * 60 * 60);
+            long hours = secondsInADay / 3600;
+            long minutes = (secondsInADay / 60) % 60;
+            long seconds = secondsInADay % 60;
+
+            countdown = "Next: " + days + ":" + String.format("%02d", hours) + ":" + String.format("%02d", minutes) + ":" + String.format("%02d", seconds);
+        }
+
+        return countdown;
+    }
+
     /**
      * Takes calendar file and puts it into the priority queue
      *
@@ -79,10 +96,15 @@ public class Controller {
                         sdf.setTimeZone(timezone);
 
                         Date date = sdf.parse(time);
+                        Date currentDate = new Date();
 
-                        Alarm alarm = new Alarm(date, summary);
+                        if (date.getTime() < currentDate.getTime()) {
+                            removeAlarm(time, summary);
+                        } else {
+                            Alarm alarm = new Alarm(date, summary);
 
-                        q.add(alarm, date.getTime());
+                            q.add(alarm, date.getTime());
+                        }
                     } catch (QueueOverflowException e) {
                         throw new RuntimeException(e);
                     } catch (ParseException e) {
@@ -96,8 +118,9 @@ public class Controller {
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
+    }
 
-        PriorityQueue<Alarm> q = new SortedLinkedListPriorityQueue<>();
-        q.toString();
+    public static void removeAlarm(String time, String summary) {
+        // Search how to remove all text between two lines (BEGIN/END: VEVENT).
     }
 }
