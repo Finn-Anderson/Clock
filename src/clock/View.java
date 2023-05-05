@@ -5,21 +5,16 @@ import priorityqueues.QueueUnderflowException;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class View implements Observer {
     
     ClockPanel panel;
 
-    private JLabel countdownTxt;
+    private final JLabel countdownTxt;
     
     public View(Model model) {
         JFrame frame = new JFrame();
@@ -70,31 +65,29 @@ public class View implements Observer {
         // Alarms list to add/edit/delete alarms.
         JButton alarms = new JButton("Alarms");
         alarms.setAlignmentX(Component.LEFT_ALIGNMENT);
-        alarms.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JDialog alarmWindow = new JDialog();
-                alarmWindow.setSize(new Dimension(300, 400));
-                alarmWindow.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
-                Box box = Box.createVerticalBox();
-                alarmWindow.add(box);
+        alarms.addActionListener(e -> {
+            JDialog alarmWindow = new JDialog();
+            alarmWindow.setSize(new Dimension(300, 400));
+            alarmWindow.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
-                List<PriorityItem<Alarm>> alarmList = Controller.fetchAlarmList();
+            Box box = Box.createVerticalBox();
+            alarmWindow.add(box);
 
-                for (var i = 0; i < alarmList.size(); i++) {
-                    JButton btn = new JButton("<html>" + alarmList.get(i).getItem().getDate() + "<br>" + alarmList.get(i).getItem().getSummary() + "</html>");
-                    btn.setAlignmentX(Component.CENTER_ALIGNMENT);
-                    box.add(btn);
-                    box.add(Box.createVerticalStrut(10));
-                }
+            List<PriorityItem<Alarm>> alarmList = Controller.fetchAlarmList();
 
-                JButton newAlarm = new JButton("New");
-                newAlarm.setAlignmentX(Component.CENTER_ALIGNMENT);
-                box.add(newAlarm, BorderLayout.PAGE_END);
-
-                alarmWindow.setVisible(true);
+            for (PriorityItem<Alarm> alarmPriorityItem : alarmList) {
+                JButton btn = new JButton("<html>" + alarmPriorityItem.getItem().getDate() + "<br>" + alarmPriorityItem.getItem().getSummary() + "</html>");
+                btn.setAlignmentX(Component.CENTER_ALIGNMENT);
+                box.add(btn);
+                box.add(Box.createVerticalStrut(10));
             }
+
+            JButton newAlarm = new JButton("New");
+            newAlarm.setAlignmentX(Component.CENTER_ALIGNMENT);
+            box.add(newAlarm, BorderLayout.PAGE_END);
+
+            alarmWindow.setVisible(true);
         });
 
         // Menu bar w/ alarm button and countdown timer

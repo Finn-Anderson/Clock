@@ -10,7 +10,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
-import javax.swing.*;
 import javax.swing.Timer;
 
 public class Controller {
@@ -21,7 +20,7 @@ public class Controller {
     Model model;
     View view;
 
-    private static PriorityQueue<Alarm> q = new SortedLinkedListPriorityQueue<>();
+    private final static PriorityQueue<Alarm> q = new SortedLinkedListPriorityQueue<>();
     
     public Controller(Model m, View v) {
         model = m;
@@ -38,9 +37,7 @@ public class Controller {
     }
 
     public static List<PriorityItem<Alarm>> fetchAlarmList() {
-        List<PriorityItem<Alarm>> alarmList = q.getAlarms();
-
-        return alarmList;
+        return q.getAlarms();
     }
 
     public static String nextAlarm() throws QueueUnderflowException {
@@ -97,9 +94,7 @@ public class Controller {
 
                             q.add(alarm, date.getTime());
                         }
-                    } catch (QueueOverflowException e) {
-                        throw new RuntimeException(e);
-                    } catch (ParseException e) {
+                    } catch (QueueOverflowException | ParseException e) {
                         throw new RuntimeException(e);
                     }
 
