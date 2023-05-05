@@ -14,6 +14,10 @@ public class View implements Observer {
     
     ClockPanel panel;
 
+    private final JDialog alarmPopup;
+
+    private final JLabel reminderTxt;
+
     private final JLabel countdownTxt;
     
     public View(Model model) {
@@ -67,12 +71,12 @@ public class View implements Observer {
         alarms.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         alarms.addActionListener(e -> {
-            JDialog alarmWindow = new JDialog();
-            alarmWindow.setSize(new Dimension(300, 400));
-            alarmWindow.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+            JDialog alarmListWindow = new JDialog();
+            alarmListWindow.setSize(new Dimension(300, 400));
+            alarmListWindow.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
             Box box = Box.createVerticalBox();
-            alarmWindow.add(box);
+            alarmListWindow.add(box);
 
             List<PriorityItem<Alarm>> alarmList = Controller.fetchAlarmList();
 
@@ -87,7 +91,7 @@ public class View implements Observer {
             newAlarm.setAlignmentX(Component.CENTER_ALIGNMENT);
             box.add(newAlarm, BorderLayout.PAGE_END);
 
-            alarmWindow.setVisible(true);
+            alarmListWindow.setVisible(true);
         });
 
         // Menu bar w/ alarm button and countdown timer
@@ -98,6 +102,33 @@ public class View implements Observer {
         countdownTxt = new JLabel();
         countdownTxt.setAlignmentX(Component.RIGHT_ALIGNMENT);
         menu.add(countdownTxt);
+
+        // Alarm popup
+        alarmPopup = new JDialog();
+        alarmPopup.setSize(new Dimension(200, 200));
+
+        Box popupBox = Box.createVerticalBox();
+        alarmPopup.add(popupBox);
+
+        JLabel reminderHeader = new JLabel("Reminder:");
+        reminderHeader.setAlignmentX(Component.CENTER_ALIGNMENT);
+        popupBox.add(reminderHeader);
+
+        popupBox.add(Box.createVerticalStrut(10));
+
+        reminderTxt = new JLabel();
+        reminderTxt.setAlignmentX(Component.CENTER_ALIGNMENT);
+        popupBox.add(reminderTxt);
+
+        popupBox.add(Box.createVerticalStrut(20));
+
+        JButton closeBtn = new JButton("Close");
+        closeBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        popupBox.add(closeBtn);
+
+        closeBtn.addActionListener(e -> {
+            alarmPopup.dispose();
+        });
         
         // End of borderlayout code
         
@@ -109,7 +140,7 @@ public class View implements Observer {
         panel.repaint();
 
         try {
-            String countdown = Controller.nextAlarm();
+            String countdown = Controller.alarmTimer(alarmPopup, reminderTxt);
 
             countdownTxt.setText(countdown);
         } catch (QueueUnderflowException e) {

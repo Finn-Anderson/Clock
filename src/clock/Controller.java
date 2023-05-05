@@ -10,6 +10,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
+import javax.swing.*;
 import javax.swing.Timer;
 
 public class Controller {
@@ -40,13 +41,23 @@ public class Controller {
         return q.getAlarms();
     }
 
-    public static String nextAlarm() throws QueueUnderflowException {
+    public static String alarmTimer(JDialog alarmPopup, JLabel reminderTxt) throws QueueUnderflowException {
         String countdown = null;
 
         if (!q.isEmpty()) {
             Alarm head = q.head();
 
-            long time = ( (head.date.getTime() - new Date().getTime()) / 1000 );
+            long time = head.date.getTime() - new Date().getTime();
+
+            if (time < 1) {
+                reminderTxt.setText(q.head().summary);
+
+                q.remove();
+
+                alarmPopup.setVisible(true);
+            }
+
+            time /= 1000;
             long days = time / (24 * 60 * 60);
             long secondsInADay = time % (24 * 60 * 60);
             long hours = secondsInADay / 3600;
@@ -105,10 +116,5 @@ public class Controller {
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public static void removeAlarm() throws QueueUnderflowException {
-
-        q.remove();
     }
 }
