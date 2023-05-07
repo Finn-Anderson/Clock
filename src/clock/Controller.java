@@ -6,6 +6,8 @@ import priorityqueues.PriorityQueue;
 import java.awt.event.*;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -76,44 +78,60 @@ public class Controller {
      * @param calendar .ics file chosen
      */
     public static void loadAlarms(File calendar) {
-        try {
-            Scanner reader = new Scanner(calendar);
+        if (calendar.exists()) {
+            try {
+                Scanner reader = new Scanner(calendar);
 
-            String time = "";
-            String summary = "";
+                String time = "";
+                String summary = "";
 
-            while (reader.hasNextLine()) {
-                String data = reader.nextLine();
+                while (reader.hasNextLine()) {
+                    String data = reader.nextLine();
 
-                if (data.contains("DTSTART:")) {
-                    time = data.substring(8);
-                } else if (data.contains("SUMMARY:")) {
-                    summary = data.substring(8);
-                }
-
-                if (!time.isEmpty() && !summary.isEmpty()) {
-                    try {
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
-                        TimeZone timezone = TimeZone.getTimeZone("Europe/London");
-                        sdf.setTimeZone(timezone);
-
-                        Date date = sdf.parse(time);
-                        Date currentDate = new Date();
-
-                        if (date.getTime() > currentDate.getTime()) {
-                            Alarm alarm = new Alarm(date, summary);
-
-                            q.add(alarm, date.getTime());
-                        }
-                    } catch (QueueOverflowException | ParseException e) {
-                        throw new RuntimeException(e);
+                    if (data.contains("DTSTART:")) {
+                        time = data.substring(8);
+                    } else if (data.contains("SUMMARY:")) {
+                        summary = data.substring(8);
                     }
 
-                    time = "";
-                    summary = "";
+                    if (!time.isEmpty() && !summary.isEmpty()) {
+                        try {
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
+                            TimeZone timezone = TimeZone.getTimeZone("Europe/London");
+                            sdf.setTimeZone(timezone);
+
+                            Date date = sdf.parse(time);
+                            Date currentDate = new Date();
+
+                            if (date.getTime() > currentDate.getTime()) {
+                                Alarm alarm = new Alarm(date, summary);
+
+                                q.add(alarm, date.getTime());
+                            }
+                        } catch (QueueOverflowException | ParseException e) {
+                            throw new RuntimeException(e);
+                        }
+
+                        time = "";
+                        summary = "";
+                    }
                 }
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
             }
-        } catch (FileNotFoundException e) {
+        }
+    }
+
+    /**
+     * Writes current items in priority queue to file. This executes upon program close and file chosen.
+     *
+     * @param calendar .ics file chosen
+     */
+    public static void saveAlarms(File calendar) {
+        try {
+            FileWriter writer = new FileWriter(calendar, false);
+
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

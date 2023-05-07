@@ -4,6 +4,7 @@ import priorityqueues.PriorityItem;
 import priorityqueues.QueueUnderflowException;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.io.File;
 import java.util.List;
@@ -25,8 +26,9 @@ public class View implements Observer {
         panel = new ClockPanel(model);
         //frame.setContentPane(panel);
         frame.setTitle("Java Clock");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        // JFrame.EXIT_ON_CLOSE
+
         // Start of border layout code
         
         // I've just put a single button in each of the border positions:
@@ -52,6 +54,21 @@ public class View implements Observer {
         JFileChooser chooser = new JFileChooser(new File("C:\\Users\\finn\\OneDrive\\Code\\Java Projects\\Clock\\data"));
         chooser.setDialogTitle("Choose an iCalendar file to open");
         chooser.setSize(new Dimension(300, 400));
+        chooser.setFileFilter(new FileFilter() {
+
+            public String getDescription() {
+                return "iCalendar Files (*.ics)";
+            }
+
+            public boolean accept(File f) {
+                if (f.isDirectory()) {
+                    return true;
+                } else {
+                    String filename = f.getName().toLowerCase();
+                    return filename.endsWith(".ics") || filename.endsWith(".ics") ;
+                }
+            }
+        });
 
         int result = chooser.showSaveDialog(chooserWindow);
 
@@ -128,6 +145,50 @@ public class View implements Observer {
 
         closeBtn.addActionListener(e -> {
             alarmPopup.dispose();
+        });
+
+        // Save to folder/file
+        frame.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                JDialog saverWindow = new JDialog();
+                saverWindow.setSize(new Dimension(200, 200));
+                saverWindow.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+
+                UIManager.put("FileChooser.saveButtonText","Save");
+
+                JFileChooser saver = new JFileChooser(new File("C:\\Users\\finn\\OneDrive\\Code\\Java Projects\\Clock\\data"));
+                saver.setDialogTitle("Choose an iCalendar file to save to");
+                saver.setSize(new Dimension(300, 400));
+                saver.setFileFilter(new FileFilter() {
+
+                    public String getDescription() {
+                        return "iCalendar Files (*.ics)";
+                    }
+
+                    public boolean accept(File f) {
+                        if (f.isDirectory()) {
+                            return true;
+                        } else {
+                            String filename = f.getName().toLowerCase();
+                            return filename.endsWith(".ics") || filename.endsWith(".ics") ;
+                        }
+                    }
+                });
+
+                int saveResult = saver.showSaveDialog(saverWindow);
+
+                saverWindow.add(saver);
+
+                saverWindow.setVisible(true);
+
+                if (saveResult == JFileChooser.APPROVE_OPTION) {
+                    File file = saver.getSelectedFile();
+                    Controller.saveAlarms(file);
+                }
+
+                System.exit(0);
+            }
         });
         
         // End of borderlayout code
