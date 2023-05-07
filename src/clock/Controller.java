@@ -4,10 +4,7 @@ import priorityqueues.*;
 import priorityqueues.PriorityQueue;
 
 import java.awt.event.*;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -129,7 +126,49 @@ public class Controller {
      */
     public static void saveAlarms(File calendar) {
         try {
-            FileWriter writer = new FileWriter(calendar, false);
+            String path = calendar.getAbsolutePath();
+            if (!path.endsWith(".ics")) {
+                calendar = new File(path + ".ics");
+            }
+
+
+            if (!calendar.exists()) {
+                calendar.createNewFile();
+            }
+
+            FileWriter writer = new FileWriter(calendar.getAbsoluteFile());
+            BufferedWriter buffer = new BufferedWriter(writer);
+
+            buffer.write("Begin:VCALENDAR\r\n");
+            buffer.write("VERSION:2.0\r\n");
+            buffer.write("PRODID:-//Finn//NONSGML Alarm Clock//EN\r\n");
+
+            List<PriorityItem<Alarm>> alarmList = Controller.fetchAlarmList();
+
+            for (PriorityItem<Alarm> alarmPriorityItem : alarmList) {
+                buffer.write("Begin:VEVENT\r\n");
+
+                String uid = UUID.randomUUID().toString();
+                buffer.write("UID:" + uid + "\r\n");
+
+                String date = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'").format(alarmPriorityItem.getItem().getDate());
+                buffer.write("DTSTAMP:" + date + "\r\n");
+                buffer.write("DTSTART:" + date + "\r\n");
+
+                String summary = alarmPriorityItem.getItem().getSummary();
+                buffer.write("SUMMARY:" + summary + "\r\n");
+
+                buffer.write("Begin:VALARM\r\n");
+                buffer.write("TRIGGER:-PT0M\r\n");
+                buffer.write("ACTION:DISPLAY\r\n");
+                buffer.write("DESCRIPTION:Reminder\r\n");
+                buffer.write("END:VALARM\r\n");
+                buffer.write("END:VEVENT\r\n");
+            }
+
+            buffer.write("END:VCALENDAR\r\n");
+
+            buffer.close();
 
         } catch (IOException e) {
             throw new RuntimeException(e);
