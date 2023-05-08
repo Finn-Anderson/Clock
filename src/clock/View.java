@@ -5,10 +5,10 @@ import priorityqueues.QueueUnderflowException;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.text.DateFormatter;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.File;
-import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
 import java.util.List;
@@ -22,6 +22,8 @@ public class View implements Observer {
     private final JLabel reminderTxt;
 
     private final JLabel countdownTxt;
+
+    private final Box alarmListBox = Box.createVerticalBox();
     
     public View(Model model) {
         JFrame frame = new JFrame();
@@ -94,25 +96,9 @@ public class View implements Observer {
             alarmListWindow.setSize(new Dimension(300, 400));
             alarmListWindow.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
-            Box box = Box.createVerticalBox();
-            alarmListWindow.add(box);
+            alarmListWindow.add(alarmListBox);
 
-            List<PriorityItem<Alarm>> alarmList = Controller.fetchAlarmList();
-
-            for (PriorityItem<Alarm> alarmPriorityItem : alarmList) {
-                JButton btn = new JButton("<html>" + alarmPriorityItem.getItem().getDate() + "<br>" + alarmPriorityItem.getItem().getSummary() + "</html>");
-                btn.setAlignmentX(Component.CENTER_ALIGNMENT);
-                box.add(btn);
-                box.add(Box.createVerticalStrut(10));
-
-                btn.addActionListener(ex -> selectAlarm(alarmPriorityItem.getItem().getDate(), alarmPriorityItem.getItem().getSummary()));
-            }
-
-            JButton btn = new JButton("New");
-            btn.setAlignmentX(Component.CENTER_ALIGNMENT);
-            box.add(btn, BorderLayout.PAGE_END);
-
-            btn.addActionListener(ex -> selectAlarm(new Date(), ""));
+            alarmList();
 
             alarmListWindow.setVisible(true);
         });
@@ -201,14 +187,38 @@ public class View implements Observer {
         frame.setVisible(true);
     }
 
+    public void alarmList() {
+        alarmListBox.removeAll();
+
+        List<PriorityItem<Alarm>> alarmList = Controller.fetchAlarmList();
+
+        for (PriorityItem<Alarm> alarmPriorityItem : alarmList) {
+            JButton btn = new JButton("<html>" + alarmPriorityItem.getItem().getDate() + "<br>" + alarmPriorityItem.getItem().getSummary() + "</html>");
+            btn.setAlignmentX(Component.CENTER_ALIGNMENT);
+            alarmListBox.add(btn);
+            alarmListBox.add(Box.createVerticalStrut(10));
+
+            btn.addActionListener(ex -> selectAlarm(alarmPriorityItem.getItem().getDate(), alarmPriorityItem.getItem().getSummary(), "edit"));
+        }
+
+        JButton btn = new JButton("New");
+        btn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        alarmListBox.add(btn, BorderLayout.PAGE_END);
+
+        btn.addActionListener(ex -> selectAlarm(new Date(), "", "add"));
+
+        alarmListBox.repaint();
+        alarmListBox.revalidate();
+    }
+
     /** Displays the ui to add/edit/remove an alarm.
      *
      * @param date takes date of selected alarm.
      * @param summary takes summary of selected alarm.
      */
-    public void selectAlarm(Date date, String summary) {
+    public void selectAlarm(Date date, String summary, String id) {
         JDialog alarmWindow = new JDialog();
-        alarmWindow.setSize(new Dimension(300, 200));
+        alarmWindow.setSize(new Dimension(200, 300));
         alarmWindow.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
         Box box = Box.createVerticalBox();
@@ -321,8 +331,6 @@ public class View implements Observer {
             checkTime.set(Calendar.MONTH, ((int) monthSpinner.getValue()) - 1);
             checkTime.set(Calendar.YEAR, (int) yearSpinner.getValue());
 
-            System.out.print(checkTime.compareTo(currentDate) + "\r\n");
-
             if (checkTime.compareTo(currentDate) < 0) {
                 Date current = new Date();
                 current.setMinutes(current.getMinutes() + 1);
@@ -333,6 +341,94 @@ public class View implements Observer {
         timeContainer.add(timeLabel);
         timeLabel.setLabelFor(timeSpinner);
         timeContainer.add(timeSpinner);
+
+        JPanel textContainer = new JPanel();
+        box.add(textContainer);
+
+        JTextArea textarea = new JTextArea();
+        textarea.setColumns(14);
+        textarea.setRows(7);
+        textarea.setText(summary);
+        textarea.setLineWrap(true);
+        textarea.setWrapStyleWord(true);
+
+        textarea.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                try {
+                    if (textarea.getText().length() > 255) {
+                        e.consume();
+                        textarea.setText(textarea.getText().substring(0, 256));
+                    }
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {}
+
+            @Override
+            public void keyReleased(KeyEvent e) {}
+        });
+
+        JPanel btnContainer = new JPanel();
+        box.add(btnContainer);
+
+        if (Objects.equals(id, "add")) {
+            JButton add = new JButton("add");
+            add.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+            add.addActionListener(e -> {
+                Calendar cal = Calendar.getInstance();
+                cal.setTime((Date) timeSpinner.getValue());
+                cal.set(Calendar.YEAR, (int) yearSpinner.getValue());
+                cal.set(Calendar.MONTH, ((int) monthSpinner.getValue()) - 1);
+                cal.set(Calendar.DAY_OF_MONTH, (int) daySpinner.getValue());
+
+                Controller.addAlarms(cal.getTime(), textarea.getText());
+
+                alarmList();
+
+                alarmWindow.dispose();
+            });
+
+            btnContainer.add(add);
+        } else {
+            JButton save = new JButton("Save");
+            save.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+            save.addActionListener(e -> {
+                Calendar cal = Calendar.getInstance();
+                cal.setTime((Date) timeSpinner.getValue());
+                cal.set(Calendar.YEAR, (int) yearSpinner.getValue());
+                cal.set(Calendar.MONTH, ((int) monthSpinner.getValue()) - 1);
+                cal.set(Calendar.DAY_OF_MONTH, (int) daySpinner.getValue());
+
+                Controller.editAlarms(date, summary, cal.getTime(), textarea.getText());
+
+                alarmList();
+
+                alarmWindow.dispose();
+            });
+
+            JButton delete = new JButton("Delete");
+            delete.setAlignmentX(Component.RIGHT_ALIGNMENT);
+
+            delete.addActionListener(e -> {
+                Controller.deleteAlarm(date, summary);
+
+                alarmList();
+
+                alarmWindow.dispose();
+            });
+
+            btnContainer.add(save);
+            btnContainer.add(delete);
+        }
+
+
+        textContainer.add(new JScrollPane(textarea));
 
         alarmWindow.setVisible(true);
     }

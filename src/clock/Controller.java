@@ -36,10 +36,21 @@ public class Controller {
         timer.start();
     }
 
+    /** Returns all alarms in priority queue to display.
+     *
+     * @return alarms
+     */
     public static List<PriorityItem<Alarm>> fetchAlarmList() {
         return q.getAlarms();
     }
 
+    /** Shows alarm popup if alarm timer is 0. Displays timer ticking at the bottom right.
+     *
+     * @param alarmPopup Alarm popup dialog
+     * @param reminderTxt Text to set in alarm popup
+     * @return
+     * @throws QueueUnderflowException
+     */
     public static String alarmTimer(JDialog alarmPopup, JLabel reminderTxt) throws QueueUnderflowException {
         String countdown = null;
 
@@ -117,6 +128,43 @@ public class Controller {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    /** Adds alarm to priority queue.
+     *
+     * @param date date entered.
+     * @param summary summary entered.
+     */
+    public static void addAlarms(Date date, String summary) {
+        try {
+            if (date.getTime() < new Date().getTime()) {
+                date = new Date();
+                date.setMinutes(date.getMinutes() + 1);
+            }
+
+            Alarm alarm = new Alarm(date, summary);
+            q.add(alarm, date.getTime());
+        } catch (QueueOverflowException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /** Edits an alarm in the priority queue.
+     *
+     * @param oldDate old date stored.
+     * @param oldSummary old summary stored.
+     * @param newDate new date to store.
+     * @param newSummary new summary to store.
+     */
+    public static void editAlarms(Date oldDate, String oldSummary, Date newDate, String newSummary) {
+        q.delete(oldDate, oldSummary);
+
+        addAlarms(newDate, newSummary);
+    }
+
+
+    public static void deleteAlarm(Date date, String summary) {
+        q.delete(date, summary);
     }
 
     /**
