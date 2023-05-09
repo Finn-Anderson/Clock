@@ -162,7 +162,7 @@ public class ControllerTest {
     public void deleteAlarm() {
         Calendar target = Calendar.getInstance();
         target.set(Calendar.YEAR, 2023);
-        target.set(Calendar.MONTH, 4);
+        target.set(Calendar.MONTH, 5);
         target.set(Calendar.DAY_OF_MONTH, 9);
         target.set(Calendar.HOUR_OF_DAY, 18);
         target.set(Calendar.MINUTE, 0);
@@ -204,7 +204,7 @@ public class ControllerTest {
     public void saveAlarms() {
         Calendar calendar1 = Calendar.getInstance();
         calendar1.set(Calendar.YEAR, 2023);
-        calendar1.set(Calendar.MONTH, 4);
+        calendar1.set(Calendar.MONTH, 5);
         calendar1.set(Calendar.DAY_OF_MONTH, 9);
         calendar1.set(Calendar.HOUR_OF_DAY, 18);
         calendar1.set(Calendar.MINUTE, 0);

@@ -98,7 +98,7 @@ public class View implements Observer {
             alarmListWindow.setSize(new Dimension(300, 400));
             alarmListWindow.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
-            alarmListWindow.add(alarmListBox);
+            alarmListWindow.add(new JScrollPane(alarmListBox));
 
             alarmList();
 
