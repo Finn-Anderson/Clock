@@ -84,7 +84,9 @@ public class View implements Observer {
             File file = chooser.getSelectedFile();
             Controller.loadAlarms(file);
 
-            chooserWindow.setVisible(false);
+            chooserWindow.dispose();
+        } else {
+            chooserWindow.dispose();
         }
 
         // Alarms list to add/edit/delete alarms.
@@ -187,6 +189,10 @@ public class View implements Observer {
         frame.setVisible(true);
     }
 
+    /**
+     * Displays all alarms in the priority queue.
+     * Upon clicking on a specific alarm, it will bring you to an edit/delete page with its respective information filled in and ready to be altered.
+     */
     public void alarmList() {
         alarmListBox.removeAll();
 
@@ -211,7 +217,8 @@ public class View implements Observer {
         alarmListBox.revalidate();
     }
 
-    /** Displays the ui to add/edit/remove an alarm.
+    /**
+     * Displays the ui to add/edit/remove an alarm.
      *
      * @param date takes date of selected alarm.
      * @param summary takes summary of selected alarm.
@@ -342,6 +349,7 @@ public class View implements Observer {
         timeLabel.setLabelFor(timeSpinner);
         timeContainer.add(timeSpinner);
 
+        // Textarea
         JPanel textContainer = new JPanel();
         box.add(textContainer);
 
@@ -375,6 +383,7 @@ public class View implements Observer {
         JPanel btnContainer = new JPanel();
         box.add(btnContainer);
 
+        // Buttons depending on whether adding a new alarm or editing/deleting an existing alarm.
         if (Objects.equals(id, "add")) {
             JButton add = new JButton("add");
             add.setAlignmentX(Component.CENTER_ALIGNMENT);

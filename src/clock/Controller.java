@@ -36,7 +36,8 @@ public class Controller {
         timer.start();
     }
 
-    /** Returns all alarms in priority queue to display.
+    /**
+     * Returns all alarms in priority queue to display.
      *
      * @return alarms
      */
@@ -44,11 +45,12 @@ public class Controller {
         return q.getAlarms();
     }
 
-    /** Shows alarm popup if alarm timer is 0. Displays timer ticking at the bottom right.
+    /**
+     * Shows alarm popup if alarm timer is 0. Displays timer ticking at the bottom right.
      *
      * @param alarmPopup Alarm popup dialog
      * @param reminderTxt Text to set in alarm popup
-     * @return
+     * @return countdown
      * @throws QueueUnderflowException
      */
     public static String alarmTimer(JDialog alarmPopup, JLabel reminderTxt) throws QueueUnderflowException {
@@ -130,7 +132,8 @@ public class Controller {
         }
     }
 
-    /** Adds alarm to priority queue.
+    /**
+     * Adds alarm to priority queue.
      *
      * @param date date entered.
      * @param summary summary entered.
@@ -149,7 +152,8 @@ public class Controller {
         }
     }
 
-    /** Edits an alarm in the priority queue.
+    /**
+     * Edits an alarm in the priority queue.
      *
      * @param oldDate old date stored.
      * @param oldSummary old summary stored.
@@ -163,6 +167,12 @@ public class Controller {
     }
 
 
+    /**
+     * Deletes a specific alarm by finding its date and summary.
+     *
+     * @param date date of the alarm.
+     * @param summary summary of the alarm.
+     */
     public static void deleteAlarm(Date date, String summary) {
         q.delete(date, summary);
     }
